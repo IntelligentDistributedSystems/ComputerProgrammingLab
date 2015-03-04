@@ -1,0 +1,86 @@
+# depslib dependency file v1.0
+1417204052 source:c:\users\razwan\desktop\sp.inv\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	<mmsystem.h>
+
+1418235565 source:c:\users\razwan\desktop\space invaders 2.0\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
+1417542532 source:c:\users\razwan\desktop\space invaders 2.0\resources.rc
+	"resource.h"
+
+1417542561 c:\users\razwan\desktop\space invaders 2.0\resource.h
+
+1417542532 source:c:\users\razwan\desktop\spinv\space invaders 2.0\resources.rc
+	"resource.h"
+
+1417542561 c:\users\razwan\desktop\spinv\space invaders 2.0\resource.h
+
+1420465409 source:c:\users\razwan\desktop\spinv\space invaders 2.0\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
+1421679226 source:c:\users\bogdanel\desktop\spinv\space invaders 2.0\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
+1417542561 c:\users\bogdanel\desktop\spinv\space invaders 2.0\resource.h
+
+1417542532 source:c:\users\bogdanel\desktop\spinv\space invaders 2.0\resources.rc
+	"resource.h"
+
+1417542532 source:c:\users\bogdanel\desktop\space invaders eng\resources.rc
+	"resource.h"
+
+1417542561 c:\users\bogdanel\desktop\space invaders eng\resource.h
+
+1424348207 source:c:\users\bogdanel\desktop\space invaders eng\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
+1417542532 source:c:\users\bogdanel\desktop\space invaders\resources.rc
+	"resource.h"
+
+1417542561 c:\users\bogdanel\desktop\space invaders\resource.h
+
+1424801231 source:c:\users\bogdanel\desktop\space invaders\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<stdlib.h>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+

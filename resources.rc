@@ -1,0 +1,2 @@
+#include "resource.h"
+IDR_SOUND WAVE "audio\\gameover.wav"
