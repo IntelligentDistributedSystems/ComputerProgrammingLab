@@ -51,12 +51,12 @@ enum direction {lleft,rright,up,down};
     bool level_was_changed = false;
     bool exists_player_rocker[36];
 
-int poz_enemy_spaceships_x[100],poz_enemy_spaceships_y[100],nr_enemy_spaceships;
-int y_limit_rand_move_enemy_spaceships;
+int poz_enemy_x[100],poz_enemy_y[100],nr_enemies;
+int y_limit_rand_move_enemy;
 
-void Finding_y_limit_rand_move_enemy_spaceships();
-void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy_spaceships);
-void Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships();
+void Finding_y_limit_rand_move_enemy();
+void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy);
+void Find_poz_enemy_xy_AND_poz_player();
 void Move_Rand_Enemy_Spaceships();
 void Move_Y_Enemy_Spaceships();
 void Move_X_Enemy_Spaceships( double &i_Move_X_Enemy_Spaceships );
@@ -94,7 +94,7 @@ int GameOver();
 void Add_Score(int bonus);
 void Decrease_Life(int malus);
 int Max(int c, int d);
-void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fire );
+void Auto_Play(double *time, double *i_Player_Fire, double *lt_Player_Fire );
 
 int main()
 {
@@ -106,17 +106,17 @@ int main()
     time = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 
     // intervals for the various actions/functions of the game
-        double LAST_TIME_Player_Fire = start;
-        double LAST_TIME_Move_Player_Rockets = start;
-        double LAST_TIME_Move_Enemy_Rockets = start;
-        double LAST_TIME_Enemy_fire = start;
-//      double LAST_TIME_Move_Player_Spaceship = start;
-        double LAST_TIME_Move_X_Enemy_Spaceships = start;
-//      double LAST_TIME_Move_Y_Enemy_Spaceships = start;
-        double LAST_TIME_Move_Rand_Enemy_Spaceships = start;
-        double LAST_TIME_Add_Bonus = start;
-        double LAST_TIME_Add_Malus = start + 5.0;
-        double LAST_TIME_modif_y_limit_rand_move_enemy_spaceships = start;
+        double lt_Player_Fire = time; // lt = last time
+        double lt_Move_Player_Rockets = time;
+        double lt_Move_Enemy_Rockets = time;
+        double lt_Enemy_fire = time;
+//      double lt_Move_Player_Spaceship = start;
+        double lt_Move_X_Enemy_Spaceships = time;
+//      double lt_Move_Y_Enemy_Spaceships = start;
+        double lt_Move_Rand_Enemy_Spaceships = time;
+        double lt_Add_Bonus = time;
+        double lt_Add_Malus = time + 5.0;
+        double lt_modif_y_limit_rand_move_enemy = time;
 
         double i_Player_Fire = 0.75;
         double i_Move_Player_Rockets = 0.015;
@@ -130,7 +130,7 @@ int main()
         double i_Remove_Bonus=3.5;
         double i_Add_Malus=8.5;
         double i_Remove_Malus=5.0;
-        double i_modif_y_limit_rand_move_enemy_spaceships=5.5;
+        double i_modif_y_limit_rand_move_enemy=5.5;
         int i_Main = 35;
 
     PleaseWaitScreen(); // useless, annoying but funny
@@ -157,7 +157,7 @@ int main()
             GameOver(); // check if exist enemy ships
 
             if(autoplay==true){
-                    Auto_Play(&time, &i_Player_Fire, &LAST_TIME_Player_Fire);
+                    Auto_Play(&time, &i_Player_Fire, &lt_Player_Fire);
             }
             else{//autoplay==false
                 if(( GetAsyncKeyState( 'A' ) & 0x8000 ) || ( GetAsyncKeyState( VK_LEFT ) & 0x8000 ) ){ // if "A" or LEFT key is pressed then move player spaceship to the left
@@ -173,8 +173,8 @@ int main()
                     Move_Player_Spaceship('W');
                 }
                 if( GetAsyncKeyState( VK_SPACE ) & 0x8000 ){ // If space key is pressed
-                    if(time - LAST_TIME_Player_Fire >= i_Player_Fire) { // present time - last time player fire > shooting interval
-                       LAST_TIME_Player_Fire=time; // update LAST_TIME_Player_Fire
+                    if(time - lt_Player_Fire >= i_Player_Fire) { // present time - last time player fire > shooting interval
+                       lt_Player_Fire=time; // update lt_Player_Fire
                        Player_Fire(); // bum bum bum // place 1/2/3 rocket/s on matrix above the players position. The rockets will be moved by another funciton
                     }
                 }
@@ -188,54 +188,54 @@ int main()
                 }
                 Sleep(250);// Sleep(250) is important for this that would otherwise quickly swapped between game and menu and it would be very annoying
             }
-            if(time-LAST_TIME_Move_Player_Rockets >= i_Move_Player_Rockets) { //On a well-established interval (i_Move_Player_Rockets) is moving player rockets (Move_Player_Rockets())
-                LAST_TIME_Move_Player_Rockets=time;
+            if( time - lt_Move_Player_Rockets >= i_Move_Player_Rockets ) { //On a well-established interval (i_Move_Player_Rockets) is moving player rockets (Move_Player_Rockets())
+                lt_Move_Player_Rockets = time;
                 Move_Player_Rockets(i_Player_Fire);
             }
-            if( time - LAST_TIME_Move_Enemy_Rockets >= i_Move_Enemy_Rockets) {
-                LAST_TIME_Move_Enemy_Rockets=time;
+            if( time - lt_Move_Enemy_Rockets >= i_Move_Enemy_Rockets ) {
+                lt_Move_Enemy_Rockets = time;
                 Move_Enemy_Rockets();
             }
-            if(time-LAST_TIME_Enemy_fire >= i_Enemy_fire){
-                LAST_TIME_Enemy_fire=time;
+            if( time - lt_Enemy_fire >= i_Enemy_fire ){
+                lt_Enemy_fire = time;
                 Enemy_fire();
             }
-            if(level.present<5){ // up to level 5 enemies move only horizontally
-                if(time-LAST_TIME_Move_X_Enemy_Spaceships >= i_Move_X_Enemy_Spaceships){
-                    LAST_TIME_Move_X_Enemy_Spaceships=time;
+            if(level.present < 5){ // up to level 5 enemies move only horizontally
+                if(time - lt_Move_X_Enemy_Spaceships >= i_Move_X_Enemy_Spaceships){
+                    lt_Move_X_Enemy_Spaceships = time;
                     Move_X_Enemy_Spaceships(i_Move_X_Enemy_Spaceships);
                 }
             }
             else { // after lvl 5  enemies moves "random"
-                if(time-LAST_TIME_Move_Rand_Enemy_Spaceships >= i_Move_Rand_Enemy_Spaceships){
-                    LAST_TIME_Move_Rand_Enemy_Spaceships=time;
+                if(time - lt_Move_Rand_Enemy_Spaceships >= i_Move_Rand_Enemy_Spaceships){
+                    lt_Move_Rand_Enemy_Spaceships=time;
                     Move_Rand_Enemy_Spaceships();
                 }
 
-                if(time-LAST_TIME_modif_y_limit_rand_move_enemy_spaceships >= i_modif_y_limit_rand_move_enemy_spaceships){ // Spaceships moves random but have a lower limit that increases periodically
-                    LAST_TIME_modif_y_limit_rand_move_enemy_spaceships=time;
-                    if(y_limit_rand_move_enemy_spaceships < dim_matrix.y)
-                        y_limit_rand_move_enemy_spaceships++;
+                if(time - lt_modif_y_limit_rand_move_enemy >= i_modif_y_limit_rand_move_enemy){ // Spaceships moves random but have a lower limit that increases periodically
+                    lt_modif_y_limit_rand_move_enemy=time;
+                    if(y_limit_rand_move_enemy < dim_matrix.y)
+                        y_limit_rand_move_enemy++;
                 }
             }
-            if(time-LAST_TIME_Add_Bonus >= i_Add_Bonus && exists_Bonus==false ){ // regularly appears a bonus (if the rocket touches this bonus it will gives bonuses / benefits to the player (more missiles to fire with or firing innterval descrease))
+            if(time - lt_Add_Bonus >= i_Add_Bonus && exists_Bonus == false ){ // regularly appears a bonus (if the rocket touches this bonus it will gives bonuses / benefits to the player (more missiles to fire with or firing innterval descrease))
                 if( weapon.present < weapon.maxim || i_Player_Fire >=0.20) {
-                    LAST_TIME_Add_Bonus=time;
+                    lt_Add_Bonus=time;
                     Add_Bonus();
                 }
             }
-                if(time-LAST_TIME_Add_Bonus >= i_Remove_Bonus && exists_Bonus==true){ // but the bonus is not staying in the sky forever ... it would be too easy: D
-                    LAST_TIME_Add_Bonus=time;
+                if(time - lt_Add_Bonus >= i_Remove_Bonus && exists_Bonus==true){ // but the bonus is not staying in the sky forever ... it would be too easy: D
+                    lt_Add_Bonus=time;
                     Remove_Bonus();
                 }
-            if(time-LAST_TIME_Add_Malus >= i_Add_Malus && exists_Malus==false ){ // bonuses, bonuses but we need something to cancel their effect
+            if(time - lt_Add_Malus >= i_Add_Malus && exists_Malus==false ){ // bonuses, bonuses but we need something to cancel their effect
                 if ( weapon.present > 0  || i_Player_Fire!=0.75) {
-                    LAST_TIME_Add_Malus=time;
+                    lt_Add_Malus=time;
                     Add_Malus();
                 }
             }
-                if(time-LAST_TIME_Add_Malus >= i_Remove_Malus && exists_Malus==true){
-                    LAST_TIME_Add_Malus=time;
+                if(time - lt_Add_Malus >= i_Remove_Malus && exists_Malus==true){
+                    lt_Add_Malus=time;
                     Remove_Malus();
                 }
         }
@@ -294,7 +294,6 @@ int main()
                 Sleep(150);
             }
         }
-
         Sleep(i_Main);// primarily affects the movement of the player
     }
 
@@ -323,21 +322,22 @@ int main()
     return 0;
 }
 
-void Finding_y_limit_rand_move_enemy_spaceships(){  //ships moves random but  with lower limit (y_limit_rand_move_enemy_spaceships). The limit is actually enemy spaceship from the lowest position Y coordinate
+void Finding_y_limit_rand_move_enemy(){  //ships moves random but  with lower limit (y_limit_rand_move_enemy). The limit is actually enemy spaceship from the lowest position Y coordinate
     int i,j;
     for(i=dim_matrix.y;i>=0;i--){
         for(j=0;j<=dim_matrix.x;j++){
             if(m[i][j]==char(4)){
-                y_limit_rand_move_enemy_spaceships=i;
+                y_limit_rand_move_enemy=i;
                 return;
             }
         }
     }
 }
-void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy_spaceships){
-    int rnd, ok=0,counter=0; // counter prevent the while running endlessly
-
-    while(!ok && counter <= 25){
+void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy){
+    int rnd, ok=0,counter=1; // counter prevent the while running endlessly
+//if each ship would move exactly in the first position resulting from random then would eat each other if they had stuck together. so if in 15 attempts not found a free place around them is supposed to be surrounded by other ships and has no where to move and it is left in the same spot
+//i could check with 4 'if()' conditions if a vessel is able to move but I chose to leave only 15 random checks of positions, so it is possible for a ship to remain in place even if it is able to move without swallowing another ship
+   while(!ok && counter <= 15){
         rnd = rand()%4; // Gets values from 0 to 3 (equivalent to directions that can move each spaceship)
         counter++;
         switch( rnd ) {
@@ -400,7 +400,7 @@ void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy_spaceships)
                 break;
             }
             case 3: { //  N
-                if( y+1 <= y_limit_rand_move_enemy_spaceships )
+                if( y+1 <= y_limit_rand_move_enemy )
                     if(m[y+1][x] == char(32)){
                         if(!exists_player_rocker[x])
                         {
@@ -426,19 +426,19 @@ int X_Lowest_Enemy(){
     int distance_from_player=dim_matrix.x+1;
     int x_enemy;
     int cntr;
-    cntr=nr_enemy_spaceships;
-    while(poz_enemy_spaceships_y[nr_enemy_spaceships] == poz_enemy_spaceships_y[cntr]){
-        if( abs(poz_enemy_spaceships_x[cntr]-coord_player_spaceship.x) < distance_from_player  ){
-            distance_from_player=abs(poz_enemy_spaceships_x[cntr]-coord_player_spaceship.x);
-            x_enemy=poz_enemy_spaceships_x[cntr];
+    cntr=nr_enemies;
+    while(poz_enemy_y[nr_enemies] == poz_enemy_y[cntr]){
+        if( abs(poz_enemy_x[cntr]-coord_player_spaceship.x) < distance_from_player  ){
+            distance_from_player=abs(poz_enemy_x[cntr]-coord_player_spaceship.x);
+            x_enemy=poz_enemy_x[cntr];
         }
         cntr--;
     }
     return x_enemy;
 }
-void Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships(){ // necessary function for random movement (it reduces the executation time of the random function) ... It stores the coordinates of each enemy ship and coordinates of players rockets
+void Find_poz_enemy_xy_AND_poz_player(){ // necessary function for random movement (it reduces the executation time of the random function) ... It stores the coordinates of each enemy ship and coordinates of players rockets
     int i,j;
-    nr_enemy_spaceships=-1;
+    nr_enemies=-1;
     for(j=0;j<=dim_matrix.x;j++){
         exists_player_rocker[j]=false;
     }
@@ -446,9 +446,9 @@ void Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships(){ // necessary func
     for(i=0;i<=dim_matrix.y;i++){
         for(j=0;j<=dim_matrix.x;j++){
             if(m[i][j]==char(4)){
-                nr_enemy_spaceships++;
-                poz_enemy_spaceships_x[nr_enemy_spaceships]=j;
-                poz_enemy_spaceships_y[nr_enemy_spaceships]=i;
+                nr_enemies++;
+                poz_enemy_x[nr_enemies]=j;
+                poz_enemy_y[nr_enemies]=i;
             }
             if(m[i][j]==char(2334) && level.present>=8){ // Until Level 7 are not taken into consideration player missiles for random movement
                 exists_player_rocker[j]=true;
@@ -458,9 +458,9 @@ void Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships(){ // necessary func
 }
 void Move_Rand_Enemy_Spaceships(){
     int i;
-    Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships();
-    for( i=0;i<=nr_enemy_spaceships; i++ ){
-        Move_spaceship_random(poz_enemy_spaceships_x[i], poz_enemy_spaceships_y[i], y_limit_rand_move_enemy_spaceships);
+    Find_poz_enemy_xy_AND_poz_player();
+    for( i=0;i<=nr_enemies; i++ ){
+        Move_spaceship_random(poz_enemy_x[i], poz_enemy_y[i], y_limit_rand_move_enemy);
     }
 }
 void Move_Y_Enemy_Spaceships(){//vertically
@@ -1860,7 +1860,7 @@ void Decrease_Life(int malus){
 }
 
 
-void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fire )
+void Auto_Play(double *time, double *i_Player_Fire, double *lt_Player_Fire )
 {
     bool exists_enemy_spaceship=false;// if on column of the player exists enemy spaceship
     bool exists_enemy_rocket_x_player=false;//if on column of the player exists enemy rocket
@@ -1869,7 +1869,7 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
 
     if(!exists_Bonus){
         if(level.present>=6){
-            Find_poz_enemy_spaceships_xy_AND_poz_player_spaceships();
+            Find_poz_enemy_xy_AND_poz_player();
             if( X_Lowest_Enemy() < coord_player_spaceship.x ){
                 if(m[coord_player_spaceship.y][coord_player_spaceship.x-1]==char(32))
                     if(m[coord_player_spaceship.y-1][coord_player_spaceship.x-1]!=char(2335))
@@ -1883,8 +1883,8 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
                             Move_Player_Spaceship('D');
             }
             if( X_Lowest_Enemy() == coord_player_spaceship.x ){
-                if(*time-*LAST_TIME_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
-                    *LAST_TIME_Player_Fire=*time;
+                if(*time-*lt_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
+                    *lt_Player_Fire=*time;
                     Player_Fire(); // bum bum bum
                 }
            }
@@ -1899,8 +1899,8 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
                 if( m[i][coord_player_spaceship.x] == char(4) ){
                     exists_enemy_spaceship=true;
                     if(!exists_block){
-                        if(*time-*LAST_TIME_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
-                            *LAST_TIME_Player_Fire=*time;
+                        if(*time-*lt_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
+                            *lt_Player_Fire=*time;
                             Player_Fire(); // bum bum bum
                         }
                     }
@@ -1913,8 +1913,8 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
                             if( m[coord_player_spaceship.y][ coord_player_spaceship.x+1] == char(32) ){
                                 Move_Player_Spaceship('D');
                                 if(!exists_block){
-                                    if(*time-*LAST_TIME_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
-                                        *LAST_TIME_Player_Fire=*time;
+                                    if(*time-*lt_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
+                                        *lt_Player_Fire=*time;
                                         Player_Fire(); // bum bum bum
                                     }
                                 }
@@ -1923,8 +1923,8 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
                                 if( m[coord_player_spaceship.y][ coord_player_spaceship.x+1] == char(32) ){
                                     Move_Player_Spaceship('A');
                                     if(!exists_block){
-                                        if(*time-*LAST_TIME_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
-                                            *LAST_TIME_Player_Fire=*time;
+                                        if(*time-*lt_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
+                                            *lt_Player_Fire=*time;
                                             Player_Fire(); // bum bum bum
                                         }
                                     }
@@ -1973,8 +1973,8 @@ void Auto_Play(double *time, double *i_Player_Fire, double *LAST_TIME_Player_Fir
                 corectaree=-1;
         }
         if( coord_player_spaceship.x==bonus.x+corectaree ){
-            if(*time-*LAST_TIME_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
-                *LAST_TIME_Player_Fire=*time;
+            if(*time-*lt_Player_Fire >= *i_Player_Fire) { // time present - last time fired > shooting interval
+                *lt_Player_Fire=*time;
                 Player_Fire(); // bum bum bum
             }
         }
