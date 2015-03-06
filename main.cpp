@@ -1,16 +1,15 @@
-//Author: Dumitru Bogdan-Mihai
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
-#include <stdlib.h>
 #include <fstream>
 #include <windows.h>
 #include <ctime>
-    #define xspaceship 17;
-    #define yspaceship 15;
-    #include "resource.h"
+#include "resource.h"
 
 using namespace std;
+
+const int xspaceship=17;
+const int yspaceship=15;
 
 struct Coordinates{
     int x, y;
@@ -31,20 +30,21 @@ struct Present_Minim_Maxim{
 enum direction {lleft,rright,up,down};
     enum direction direction_enemy_move_x = rright;
     enum direction direction_enemy_move_Y = down;
+    enum direction rnd_move;
 
         int i,j;
         char m[55][55]; // matricea campului de lupta
     int nr_lifes=3, nr_cheats, scor=0;
     int var;    char ch;
-    int nr_Elements_HScore; // nr of saved scores
-    int highScore_int[11]; // keep value of the score
-        char highScore_char[11][55];
-        char newScore_char[55];
+    int nr_scores; // nr of saved scores
+    int scores_int[11]; // keep value of the score
+        char scores_char[11][55];
+        char new_score_char[55];
         char cheats[10][15]; // strings of the cheats
         char cheat_entered[15];
     // each menu is saven in separate matrix.
     // Each menu have a number ( nr_menu ) and it keeps track of the current menu.
-        char menu[16][16], menu_settings[16][22], menuHScores[15][18],menu_Instructions[15][15], menu_leved_customize[15][15];
+        char menu[16][16], menu_settings[16][22], menu_scores[15][18],menu_instructions[15][15], menu_leved_customize[15][15];
         int nr_menu, nr_elements_menu[11], highlighted_menu_element;
     bool quit=false, sound=true, autoplay=false, level_runs=false, menu_is_displayed=true ;
     bool exists_Bonus = false, exists_Malus = false;
@@ -68,12 +68,12 @@ void Enemy_fire();
 void Player_Fire();
 void Show_Menu( int nr_menu, int highlighted_menu_element);
 void Enter ( int &nr_menu , int &highlighted_menu_element );
-void Load_HScore();
-void Save_HScore();
-void Show_HScore();
-void Swap_HScore(int a, int b);
-void Sort_HScore();
-void Add_New_HScore();
+void Load_scores();
+void Save_scores();
+void Show_scores();
+void Swap_scores(int a, int b);
+void Sort_scores();
+void Add_New_scores();
 void Show_Matrix();
 void Save_Game();
 void int_to_char( int level, char *level_actual_char );
@@ -133,11 +133,11 @@ int main()
         double i_modif_y_limit_rand_move_enemy_spaceships=5.5;
         int i_Main = 35;
 
-    //PleaseWaitScreen(); // useless, annoying but funny
+    PleaseWaitScreen(); // useless, annoying but funny
 
     Initialization_Variables();
     Load_Level( level.present ); // level.present==0 and load last game ( level0 and index_level0 )
-    Load_HScore();
+    Load_scores();
     Initialization_Menu();
 
     Show_Menu(nr_menu, highlighted_menu_element);
@@ -200,7 +200,7 @@ int main()
                 LAST_TIME_Enemy_fire=time;
                 Enemy_fire();
             }
-            if(level.present<=5){ // up to level 5 enemies move only horizontally
+            if(level.present<5){ // up to level 5 enemies move only horizontally
                 if(time-LAST_TIME_Move_X_Enemy_Spaceships >= i_Move_X_Enemy_Spaceships){
                     LAST_TIME_Move_X_Enemy_Spaceships=time;
                     Move_X_Enemy_Spaceships(i_Move_X_Enemy_Spaceships);
@@ -305,9 +305,9 @@ int main()
             PlaySound("audio\\gameover.wav", NULL, SND_ASYNC);
         }
         Sleep(1000);
-        if( nr_lifes<=0 && ( scor > highScore_int[nr_Elements_HScore] || nr_Elements_HScore==0 || nr_Elements_HScore<10 ) ){//check for a new high score
-            Add_New_HScore();
-            Save_HScore();
+        if( nr_lifes<=0 && ( scor > scores_int[nr_scores] || nr_scores==0 || nr_scores<10 ) ){//check for a new high score
+            Add_New_scores();
+            Save_scores();
             Sleep(1000);
             //Load_Level(1);
         }
@@ -315,8 +315,8 @@ int main()
         Save_Game();
         system("cls");
         printf("\n Hope to see you soon");
-        if(newScore_char[0]!='\0')
-            printf(", %s!",newScore_char);
+        if(new_score_char[0]!='\0')
+            printf(", %s!",new_score_char);
         printf("!");
         Sleep(2000);
 
@@ -335,7 +335,7 @@ void Finding_y_limit_rand_move_enemy_spaceships(){  //ships moves random but  wi
     }
 }
 void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy_spaceships){
-    int rnd,ok=0,counter=0; // counter prevent the while running endlessly
+    int rnd, ok=0,counter=0; // counter prevent the while running endlessly
 
     while(!ok && counter <= 25){
         rnd = rand()%4; // Gets values from 0 to 3 (equivalent to directions that can move each spaceship)
@@ -425,14 +425,14 @@ void Move_spaceship_random(int x, int y, int y_limit_rand_move_enemy_spaceships)
 int X_Lowest_Enemy(){
     int distance_from_player=dim_matrix.x+1;
     int x_enemy;
-    int contor;
-    contor=nr_enemy_spaceships;
-    while(poz_enemy_spaceships_y[nr_enemy_spaceships] == poz_enemy_spaceships_y[contor]){
-        if( abs(poz_enemy_spaceships_x[contor]-coord_player_spaceship.x) < distance_from_player  ){
-            distance_from_player=abs(poz_enemy_spaceships_x[contor]-coord_player_spaceship.x);
-            x_enemy=poz_enemy_spaceships_x[contor];
+    int cntr;
+    cntr=nr_enemy_spaceships;
+    while(poz_enemy_spaceships_y[nr_enemy_spaceships] == poz_enemy_spaceships_y[cntr]){
+        if( abs(poz_enemy_spaceships_x[cntr]-coord_player_spaceship.x) < distance_from_player  ){
+            distance_from_player=abs(poz_enemy_spaceships_x[cntr]-coord_player_spaceship.x);
+            x_enemy=poz_enemy_spaceships_x[cntr];
         }
-        contor--;
+        cntr--;
     }
     return x_enemy;
 }
@@ -597,7 +597,7 @@ void Move_X_Enemy_Spaceships( double &i_Move_X_Enemy_Spaceships ){ //horizontall
             }
             if( direction_was_changed == true ) {
                 direction_enemy_move_x = lleft;
-                if(level.present>=3){
+                if(level.present>=2){
                     Move_Y_Enemy_Spaceships();
                 }
                 if(i_Move_X_Enemy_Spaceships - 0.10 >= 0.05){
@@ -620,7 +620,7 @@ void Move_X_Enemy_Spaceships( double &i_Move_X_Enemy_Spaceships ){ //horizontall
             }
             if( direction_was_changed == true ) {
                 direction_enemy_move_x = rright;
-                if(level.present>=3){
+                if(level.present>=2){
                     Move_Y_Enemy_Spaceships();
                 }
                 if(i_Move_X_Enemy_Spaceships - 0.10 >= 0.05){
@@ -1091,8 +1091,8 @@ void Show_Menu( int nr_menu, int highlighted_menu_element){// Each menu has the 
             cout<<"\n High Scores \n\n\n";
             for(i = 0; i<= nr_elements_menu[ nr_menu ] ; i++) {
                 cout<<" ";
-                for(j=0; j<=strlen(menuHScores[i]);j++){
-                    cout<<menuHScores[i][j];
+                for(j=0; j<=strlen(menu_scores[i]);j++){
+                    cout<<menu_scores[i][j];
                     if( highlighted_menu_element == i ){
                         cout<<" ";
                     }
@@ -1100,7 +1100,7 @@ void Show_Menu( int nr_menu, int highlighted_menu_element){// Each menu has the 
                 cout<<endl;
             }
             cout<<endl;
-            Show_HScore();
+            Show_scores();
             break;
         }
         case (3) : { // instructiuni
@@ -1112,7 +1112,7 @@ void Show_Menu( int nr_menu, int highlighted_menu_element){// Each menu has the 
             for(int i = 0; i<= nr_elements_menu[ nr_menu ] ; i++) { // Just for back button
                 cout<<" ";
                 for(int j=0; j<=strlen(menu[i]);j++){
-                    cout<<menu_Instructions[i][j];
+                    cout<<menu_instructions[i][j];
                     if( highlighted_menu_element == i ){
                         cout<<" ";
                     }
@@ -1270,10 +1270,10 @@ void Enter ( int &nr_menu , int &highlighted_menu_element ){ // When the ENTER k
             switch (highlighted_menu_element) {
                 case 0 : {//Reset high scores
                     FILE *file;
-                    file = fopen("files\\HighScore.txt","w");
+                    file = fopen("files\\Higscores.txt","w");
                     fprintf(file,"0");
                     fclose(file);
-                    Load_HScore();
+                    Load_scores();
                     Show_Menu(nr_menu,highlighted_menu_element);
                     break;
                 }
@@ -1320,103 +1320,103 @@ void Enter ( int &nr_menu , int &highlighted_menu_element ){ // When the ENTER k
         break;
     }
 }
-void Load_HScore(){     // Read from file HighScore.txt
-    int aux;            // highScore_char [n] -> name of the player n
-                        // highScore_int [n] -> score of the player n
+void Load_scores(){     // Read from file Higscores.txt
+    int aux;            // scores_char [n] -> name of the player n
+                        // scores_char [n] -> score of the player n
     FILE *file;
-    file = fopen("files\\HighScore.txt","r");
-    fscanf(file, "%d", &nr_Elements_HScore); // Firs read number of elements
-    for(i=1;i<=nr_Elements_HScore;i++){
+    file = fopen("files\\Higscores.txt","r");
+    fscanf(file, "%d", &nr_scores); // Firs read number of elements
+    for(i=1;i<=nr_scores;i++){
         fscanf(file, "%d", &aux);
         j=0; // counter
         fscanf(file, "%c", &ch);// read char by char
         while ( ch!='=' ){ // until '=' . After = follows score value
-            highScore_char[aux][j]=ch;
+            scores_char[aux][j]=ch;
             j++;
             fscanf(file, "%c", &ch);
         }
-        fscanf(file, "%d", &highScore_int[i]); // read score value
+        fscanf(file, "%d", &scores_int[i]); // read score value
     }
     fclose(file);
 }
-void Save_HScore(){
+void Save_scores(){
     FILE *file;
-    file = fopen("files\\HighScore.txt", "w");
-    if(nr_Elements_HScore>10)
-        nr_Elements_HScore=10;
-    fprintf(file, "%d\n", nr_Elements_HScore);
-    for(i=1;i<=nr_Elements_HScore;i++){
+    file = fopen("files\\Higscores.txt", "w");
+    if(nr_scores>10)
+        nr_scores=10;
+    fprintf(file, "%d\n", nr_scores);
+    for(i=1;i<=nr_scores;i++){
         fprintf(file, "%d ", i);
-        for ( j=0;j<=strlen( highScore_char[i] ); j++ ){
-                fprintf(file, "%c", highScore_char[i][j]);
+        for ( j=0;j<=strlen( scores_char[i] ); j++ ){
+                fprintf(file, "%c", scores_char[i][j]);
         }
-        fprintf(file, " = %d\n", highScore_int[i]);
+        fprintf(file, " = %d\n", scores_int[i]);
     }
     fclose(file);
 }
-void Show_HScore(){ // Displays saved scores
-    if(nr_Elements_HScore==0){ // IF nr_Elements_HScore = 0 ( there's no saved score)
+void Show_scores(){ // Displays saved scores
+    if(nr_scores==0){ // IF nr_scores = 0 ( there's no saved score)
         cout<<"\n Wasn't recorded any score ! ";
     }
-    else { // nr_Elements_HScore!=0
-        for( i=1;i<=nr_Elements_HScore;i++){
+    else { // nr_scores!=0
+        for( i=1;i<=nr_scores;i++){
             cout<<"  "<<i<<". ";
-            for( j=0; j<= strlen (highScore_char[i]) ; j++){
-                cout<<highScore_char[i][j];
+            for( j=0; j<= strlen (scores_char[i]) ; j++){
+                cout<<scores_char[i][j];
             }
-            cout<<highScore_int[i]<<endl;
+            cout<<scores_int[i]<<endl;
         }
     }
 }
-void Swap_HScore(int a, int b){ // function used in sorting process by Sort_HScore()
+void Swap_scores(int a, int b){ // function used in sorting process by Sort_scores()
     int auxI;
     char auxC;
 
-    auxI=highScore_int[a];
-    highScore_int[a] = highScore_int[b];
-    highScore_int[b] = auxI;
+    auxI=scores_int[a];
+    scores_int[a] = scores_int[b];
+    scores_int[b] = auxI;
 
-    for(int j=0; j<=Max( strlen(highScore_char[a]), strlen(highScore_char[b]) ); j++){
-        auxC = highScore_char[a][j];
-        highScore_char[a][j] = highScore_char[b][j];
-        highScore_char[b][j] = auxC;
+    for(int j=0; j<=Max( strlen(scores_char[a]), strlen(scores_char[b]) ); j++){
+        auxC = scores_char[a][j];
+        scores_char[a][j] = scores_char[b][j];
+        scores_char[b][j] = auxC;
     }
 }
-void Sort_HScore(){ //sorting by value scores
+void Sort_scores(){ //sorting by value scores
     bool sorted=false; // bubble sort
     while( sorted==false ){
         sorted=true;
-        for(int k=nr_Elements_HScore; k>1; k--){
-            if( highScore_int[k]>highScore_int[k-1])
+        for(int k=nr_scores; k>1; k--){
+            if( scores_int[k]>scores_int[k-1])
             {
                 sorted=false;
-                Swap_HScore( k, k-1 ); // swaps value of scores and names of the players
+                Swap_scores( k, k-1 ); // swaps value of scores and names of the players
             }
         }
     }
 }
-void Add_New_HScore(){ // read and save name of the player and the new score
+void Add_New_scores(){ // read and save name of the player and the new score
     system("cls");
 
     cout<<"\n Congratulations! \n You have a record score ! \n";
     Sleep(1000);
     cout<<" What is your name ? \n";
     fflush(stdin);
-    cin>>newScore_char;
+    cin>>new_score_char;
     int counter=-1;
 
-    while(newScore_char[++counter]==' ' && counter<strlen(newScore_char))// Delete blank spaces
+    while(new_score_char[++counter]==' ' && counter<strlen(new_score_char))// Delete blank spaces
     {}
-    strcpy(newScore_char,newScore_char+counter);// Delete blank spaces
+    strcpy(new_score_char,new_score_char+counter);// Delete blank spaces
 
     cin.ignore();fflush(stdin);
 
-    nr_Elements_HScore++;
-    strcpy(highScore_char[nr_Elements_HScore],newScore_char);
-    highScore_int[nr_Elements_HScore]=scor;
-    Sort_HScore();
-    if(nr_Elements_HScore>10)
-        nr_Elements_HScore=10;
+    nr_scores++;
+    strcpy(scores_char[nr_scores],new_score_char);
+    scores_int[nr_scores]=scor;
+    Sort_scores();
+    if(nr_scores>10)
+        nr_scores=10;
     Load_Level(1);
     Save_Game();
 }
@@ -1728,10 +1728,10 @@ void Initialization_Menu(){
         strcpy(menu_settings[3]," Customize levels ");
         strcpy(menu_settings[4]," Back ");
     //high scores:
-        strcpy(menuHScores[0]," Reset scores ");
-        strcpy(menuHScores[1]," Back ");
+        strcpy(menu_scores[0]," Reset scores ");
+        strcpy(menu_scores[1]," Back ");
     //instructions :
-        strcpy(menu_Instructions[0]," Back ");
+        strcpy(menu_instructions[0]," Back ");
     //Customize levels :
         strcpy(menu_leved_customize[0]," Level 1 ");
         strcpy(menu_leved_customize[1]," Level 2 ");
@@ -1802,10 +1802,10 @@ int GameOver(){
             PlaySound("audio\\world_clear.wav", NULL, SND_ASYNC);
         }
         quit=true;// end the wail from main function
-        if( scor > highScore_int[nr_Elements_HScore] || nr_Elements_HScore==0 || nr_Elements_HScore<10 ) {// check for new h score
+        if( scor > scores_int[nr_scores] || nr_scores==0 || nr_scores<10 ) {// check for new h score
             Sleep(2500);
-            Add_New_HScore();
-            Save_HScore();
+            Add_New_scores();
+            Save_scores();
             }
         Sleep(2500);
     }

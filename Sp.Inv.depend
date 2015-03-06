@@ -84,3 +84,31 @@
 	<ctime>
 	"resource.h"
 
+1417542532 source:c:\users\bogdanel\desktop\dumitru bogdan mihai\resources.rc
+	"resource.h"
+
+1417542561 c:\users\bogdanel\desktop\dumitru bogdan mihai\resource.h
+
+1425488675 source:c:\users\bogdanel\desktop\dumitru bogdan mihai\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
+1417542532 source:c:\users\bogdanel\desktop\github\computerprogramminglab\resources.rc
+	"resource.h"
+
+1417542561 c:\users\bogdanel\desktop\github\computerprogramminglab\resource.h
+
+1425633908 source:c:\users\bogdanel\desktop\github\computerprogramminglab\main.cpp
+	<stdio.h>
+	<string.h>
+	<iostream>
+	<fstream>
+	<windows.h>
+	<ctime>
+	"resource.h"
+
